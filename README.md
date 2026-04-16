@@ -10,7 +10,7 @@ It runs inside [Binary Ninja](https://binary.ninja/) as a plugin. It works with 
 
 If you want to use HOBO BN MCP yourself, read the [User Guide](./claude-code-docker-setup/user_guide.md).
 
-If you want to teach Claude how to use HOBO BN MCP from the command line, add the ["Binary Ninja integration"](./claude-code-docker-setup/CLAUDE.md) section to your `CLAUDE.md` (make sure to specify the correct path to `user_guide.md` so Claude Code can find it).
+If you want to teach Claude how to use HOBO BN MCP from the command line, add the ["Binary Ninja integration"](./claude-code-docker-setup/CLAUDE.md) section to your `CLAUDE.md` (make sure to specify the correct path to `user_guide.md` in the `CLAUDE.md` so Claude Code can find the guide). Read [Claude Code in Docker + HOBO BN MCP](../claude-code-docker-setup/README.md) for some inspiration.
 
 ## HOBO BN MCP vs. "true MCP" solutions
 

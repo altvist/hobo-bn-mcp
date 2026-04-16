@@ -11,13 +11,13 @@ PORT="13337"
 BASE="http://${HOST}:${PORT}"
 
 BV="1" # BinaryView ID from list_views
-FUNC_NAME="NextAudioFile::IsDataFormatSupported"
-FUNC_ADDR="0x1830faa14"
+FUNC_NAME="DGifOpenFileName"
+FUNC_ADDR="0x423e94"
 IMPORT_FILTER="mem"
 STRING_FILTER="error"
-READ_ADDR="0x1830faa2c"
+READ_ADDR="0x423e94"
 READ_LEN=64
-COMMENT_ADDR="0x1830faa14"
+COMMENT_ADDR="0x423ea8"
 # ---------------------------------------------------------
 
 OK=0

@@ -53,7 +53,7 @@ Despite its name, HOBO BN MCP is **not** an MCP (Model Context Protocol) server.
 
 2. Copy `hobo_bn_mcp.py` into that directory.
 
-3. Restart Binary Ninja (or open a new file — the plugin loads on startup).
+3. Restart Binary Ninja
 
 4. Verify from a terminal:
 

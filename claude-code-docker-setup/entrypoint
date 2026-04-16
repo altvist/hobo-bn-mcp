@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Only fake onboarding if we already have credentials from a previous session
+if [ -f /root/.claude/.credentials.json ]; then
+    if [ ! -f /root/.claude/.claude.json ]; then
+        echo '{"hasCompletedOnboarding":true,"installMethod":"native"}' > /root/.claude/.claude.json
+    fi
+    ln -sf /root/.claude/.claude.json /root/.claude.json
+fi
+
+exec "$@"

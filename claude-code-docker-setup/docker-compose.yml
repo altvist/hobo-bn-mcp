@@ -1,0 +1,19 @@
+services:
+  claude:
+    build: .
+    image: claude-code:local
+    container_name: claude-code
+    network_mode: host
+    hostname: claude-code
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    volumes:
+      - ./workspace:/workspace
+      - claude-home:/root/.claude
+      - ./claude-config:/root/.config/claude
+    environment:
+      - TERM=xterm-256color
+
+volumes:
+  claude-home:
