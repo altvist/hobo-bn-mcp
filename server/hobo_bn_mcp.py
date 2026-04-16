@@ -100,6 +100,42 @@ _next_id: int = 0
 _views_lock = threading.Lock()
 
 
+def _is_bv_closed(bv) -> bool:
+    """Check if a BinaryView has been closed in the UI.
+
+    After closing a tab, BN sets bv.file.raw to None while keeping the
+    Python object alive. This is the most reliable indicator across
+    view types (ELF, DSCView, raw binaries, .bndb databases) tested on
+    Binary Ninja 5.3.x.
+    """
+    try:
+        if bv.file is None:
+            return True
+        if bv.file.raw is None:
+            return True
+        return False
+    except Exception:
+        return True
+
+
+def _prune_closed_views() -> list:
+    """Remove BinaryViews that have been closed in the UI.
+
+    Returns a list of {"id", "filename"} dicts describing pruned entries.
+    Thread-safe: acquires _views_lock internally.
+    """
+    pruned = []
+    with _views_lock:
+        stale = [vid for vid, entry in _views.items()
+                 if _is_bv_closed(entry["bv"])]
+        for vid in stale:
+            entry = _views[vid]
+            pruned.append({"id": vid, "filename": entry["filename"]})
+            Log.info(f"Pruning closed BinaryView id={vid}: {entry['filename']}")
+            del _views[vid]
+    return pruned
+
+
 def _register_bv(bv) -> str:
     """Register a BinaryView and return its ID."""
     global _next_id
@@ -110,16 +146,13 @@ def _register_bv(bv) -> str:
                 Log.debug(f"BinaryView already registered as id={vid}")
                 return vid
 
-        # Prune stale entries for the same file
+        # Prune stale entries: closed views, or old views of the same file+type
         filename = bv.file.filename
         stale = []
         for vid, entry in _views.items():
-            try:
-                _ = entry["bv"].start
-            except Exception:
+            if _is_bv_closed(entry["bv"]):
                 stale.append(vid)
                 continue
-            # Same file + same view type — old BV replaced by new analysis
             if entry["filename"] == filename and \
                entry["bv"].view_type == bv.view_type:
                 stale.append(vid)
@@ -155,15 +188,13 @@ def _get_bv_entry(vid: str) -> dict:
 def _validate_bv(entry: dict) -> Any:
     """Check that the BinaryView is still usable. Returns the bv object."""
     bv = entry["bv"]
-    try:
-        _ = bv.start
-        return bv
-    except Exception:
+    if _is_bv_closed(bv):
         raise RuntimeError(
             f"BinaryView id for '{entry['filename']}' is no longer valid. "
             f"The file may have been closed. Please reopen it in Binary Ninja "
             f"and check 'list_views' for the new ID."
         )
+    return bv
 
 
 # ---------------------------------------------------------------------------
@@ -292,13 +323,7 @@ def _cmd_list_views(params: dict) -> Any:
     with _views_lock:
         for vid, entry in _views.items():
             bv = entry["bv"]
-            status = "unknown"
-            try:
-                _ = bv.start
-                status = "ready"
-            except Exception:
-                status = "closed"
-
+            status = "closed" if _is_bv_closed(bv) else "ready"
             result.append({
                 "id": vid,
                 "filename": entry["filename"],
@@ -773,7 +798,11 @@ def _cmd_set_comment(params: dict) -> Any:
         }
 
 # ---------------------------------------------------------------------------
-# Commands - debug (not documented in the user guide)
+# Commands — debug (not documented in the user guide)
+#
+# These commands exist to help diagnose registry/lifecycle issues if BN
+# changes its internals in a future release. Keep them around but don't
+# advertise them — if something breaks, we have instrumentation ready.
 # ---------------------------------------------------------------------------
 
 @command("debug_bv_state")
@@ -827,6 +856,21 @@ def _cmd_debug_bv_state(params: dict) -> Any:
 
     return {"views": results}
 
+
+@command("debug_purge_bv")
+def _cmd_debug_purge_bv(params: dict) -> Any:
+    """Manually purge closed BinaryViews from the registry.
+
+    Normally lazy pruning runs before every command, so this is only
+    useful if the 'closed' heuristic in _is_bv_closed() stops working
+    after a BN update.
+    """
+    pruned = _prune_closed_views()
+    with _views_lock:
+        remaining = len(_views)
+    return {"pruned": pruned, "remaining": remaining}
+
+
 # ---------------------------------------------------------------------------
 # HTTP handler
 # ---------------------------------------------------------------------------
@@ -856,6 +900,13 @@ class _Handler(BaseHTTPRequestHandler):
             if handler is None:
                 self._json_err(404, f"unknown command: {cmd_name}")
                 return
+
+            # Lazy pruning: drop closed views before every command so that
+            # list_views / _require_bv / etc. always see a fresh registry.
+            # Skip for debug_bv_state — we want to inspect closed views there.
+            if cmd_name != "debug_bv_state":
+                _prune_closed_views()
+
             body = self._read_json_body()
             try:
                 result = handler(body)
