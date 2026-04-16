@@ -1,10 +1,10 @@
 # Before run `server_tests.sh` 
 
-1. Install HOBO BN MCP (check [User Guide](../user_guide.md))
+1. [Install](../server/README.md) HOBO BN MCP server
 
-2. Run Binary Ninja and open some reverse engineering project(s)
+2. Open some reverse engineering project(s) in Binary Ninja
 
-3. Open `server_tests.sh` and edit the placeholders at the beginning of the file:
+3. Open [`server_tests.sh`](./server_tests.sh) and edit the placeholders at the beginning of the file:
 
     ```sh
     # --- Placeholders: edit these to match your binary ------
