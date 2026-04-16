@@ -1100,7 +1100,7 @@ hobo_bn_mcp.start()
 
 ### "BinaryView ID 0 doesn't work"
 
-- In older versions, the first view registered might have been a "Raw" view. Version 2.0.0 filters these out automatically. Make sure you have the latest version of the plugin.
+- In older versions, the first view registered might have been a "Raw" view. Version 1.1.0 filters these out automatically. Make sure you have the latest version of the plugin.
 - Run `list_views` to see the actual available IDs — the first valid ID might be `"0"` or higher.
 
 ### "decompile returns empty code"
