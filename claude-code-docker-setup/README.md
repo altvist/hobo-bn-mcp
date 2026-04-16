@@ -26,7 +26,6 @@ To make it work:
 Now you can ask Claude to analyse the code, for example:
 
 ```
-
 > What binary ninja binary views do you see?
 
 I need the HOBO BN MCP server IP and port before I can connect. 
