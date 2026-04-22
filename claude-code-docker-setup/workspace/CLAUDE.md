@@ -24,6 +24,7 @@ When analyzing code:
 - Use `[claude]` prefix in all comments you leave.
 - Don't request all functions/strings at once — always use
   `limit` and `filter`.
+- Do not trust Binary Ninja decompilers! Always verify HLIL against the disassembly for control flow, especially around error handling and branching!
 
 # Restrictions
 
