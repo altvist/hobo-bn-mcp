@@ -29,3 +29,9 @@ However, HOBO BN MCP has one significant limitation: you must manually load your
 This is not a problem for Claude-assisted manual research — Binary Ninja is usually open anyway because you need to see the code. But if you want full headless automation like _"here's a directory, open and analyze each file in it, find binary vulnerabilities"_, you'll probably still need to [pay \$1499+ for a headless-capable license](https://binary.ninja/purchase/#commercial), use a "true MCP" solution, and be ready to spend more tokens.
 
 That's it!
+
+## The repo rules
+
+- The latest tag in `main` is the latest stable
+- The latest commit in `main` is the latest working code
+
